@@ -34,17 +34,25 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  // Fetch existing tax session
+  // Fetch existing tax session (latest one)
   const { data: taxSession, isLoading: sessionLoading } = useQuery<TaxSession>({
     queryKey: ["/api/tax-sessions/user", financialYear],
     enabled: isAuthenticated,
     retry: false,
   });
 
+  // Fetch all tax sessions for the user
+  const { data: allSessions, isLoading: allSessionsLoading } = useQuery<TaxSession[]>({
+    queryKey: ["/api/tax-sessions/user/all", financialYear],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
   // Create new tax session mutation
   const createSessionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/tax-sessions", {
+    mutationFn: async (forceNew = false) => {
+      const url = forceNew ? "/api/tax-sessions?forceNew=true" : "/api/tax-sessions";
+      const response = await apiRequest("POST", url, {
         financialYear,
         onboardingData: null,
       });
@@ -52,6 +60,7 @@ export default function Dashboard() {
     },
     onSuccess: (session) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tax-sessions/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tax-sessions/user/all"] });
       setLocation(`/wizard/onboarding/${session.id}`);
     },
     onError: (error) => {
@@ -74,24 +83,34 @@ export default function Dashboard() {
     },
   });
 
+  const handleContinueSession = (session?: TaxSession) => {
+    const sessionToUse = session || taxSession;
+    if (sessionToUse) {
+      // Resume existing session
+      const step = sessionToUse.currentStep || 1;
+      if (step === 1) {
+        setLocation(`/wizard/onboarding/${sessionToUse.id}`);
+      } else if (step <= 3) {
+        setLocation(`/wizard/upload/${sessionToUse.id}`);
+      } else if (step <= 5) {
+        setLocation(`/wizard/review/${sessionToUse.id}`);
+      } else if (step <= 7) {
+        setLocation(`/wizard/tips/${sessionToUse.id}`);
+      } else {
+        setLocation(`/wizard/itr/${sessionToUse.id}`);
+      }
+    }
+  };
+
+  const handleStartNewFiling = () => {
+    createSessionMutation.mutate(true); // Force new session
+  };
+
   const handleStartFiling = () => {
     if (taxSession) {
-      // Resume existing session
-      const step = taxSession.currentStep || 1;
-      if (step === 1) {
-        setLocation(`/wizard/onboarding/${taxSession.id}`);
-      } else if (step <= 3) {
-        setLocation(`/wizard/upload/${taxSession.id}`);
-      } else if (step <= 5) {
-        setLocation(`/wizard/review/${taxSession.id}`);
-      } else if (step <= 7) {
-        setLocation(`/wizard/tips/${taxSession.id}`);
-      } else {
-        setLocation(`/wizard/itr/${taxSession.id}`);
-      }
+      handleContinueSession();
     } else {
-      // Create new session
-      createSessionMutation.mutate();
+      createSessionMutation.mutate(false);
     }
   };
 
@@ -120,7 +139,7 @@ export default function Dashboard() {
     { number: 9, title: "Complete", description: "Filing complete" },
   ];
 
-  if (authLoading || sessionLoading) {
+  if (authLoading || sessionLoading || allSessionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -247,6 +266,62 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Session Management */}
+            {allSessions && allSessions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <i className="fas fa-history text-primary"></i>
+                    <span>Filing Sessions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid gap-3">
+                      {allSessions.slice(0, 3).map((session, index) => (
+                        <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={session.isCompleted ? "default" : "secondary"}>
+                                {session.isCompleted ? "Completed" : `Step ${session.currentStep || 1}/9`}
+                              </Badge>
+                              {index === 0 && <Badge variant="outline">Latest</Badge>}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Created: {new Date(session.createdAt!).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleContinueSession(session)}
+                            disabled={createSessionMutation.isPending}
+                            data-testid={`button-continue-session-${session.id}`}
+                          >
+                            {session.isCompleted ? "View" : "Continue"}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    {allSessions.length > 1 && (
+                      <div className="flex gap-2 pt-2 border-t">
+                        <Button
+                          variant="outline"
+                          onClick={handleStartNewFiling}
+                          disabled={createSessionMutation.isPending}
+                          className="flex-1"
+                          data-testid="button-start-new-filing"
+                        >
+                          <i className="fas fa-plus mr-2"></i>
+                          Start Fresh Filing
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Steps Overview */}
             <Card>

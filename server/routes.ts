@@ -29,11 +29,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const validatedData = createTaxSessionSchema.parse(req.body);
+      const forceNew = req.query.forceNew === 'true';
       
-      // Check if session already exists for this year
-      const existingSession = await storage.getTaxSessionByUser(userId, validatedData.financialYear);
-      if (existingSession) {
-        return res.json(existingSession);
+      // Check if session already exists for this year (only if not forcing new)
+      if (!forceNew) {
+        const existingSession = await storage.getTaxSessionByUser(userId, validatedData.financialYear);
+        if (existingSession) {
+          return res.json(existingSession);
+        }
       }
 
       const taxSession = await storage.createTaxSession({
@@ -45,6 +48,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating tax session:", error);
       res.status(500).json({ message: "Failed to create tax session" });
+    }
+  });
+
+  // Get all tax sessions for user by financial year
+  app.get('/api/tax-sessions/user/all/:financialYear', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { financialYear } = req.params;
+      
+      const sessions = await storage.getAllTaxSessionsByUser(userId, financialYear);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching tax sessions:", error);
+      res.status(500).json({ message: "Failed to fetch tax sessions" });
     }
   });
 

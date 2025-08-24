@@ -11,7 +11,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -23,6 +23,7 @@ export interface IStorage {
   createTaxSession(data: InsertTaxSession): Promise<TaxSession>;
   getTaxSession(id: string): Promise<TaxSession | undefined>;
   getTaxSessionByUser(userId: string, financialYear: string): Promise<TaxSession | undefined>;
+  getAllTaxSessionsByUser(userId: string, financialYear: string): Promise<TaxSession[]>;
   updateTaxSession(id: string, data: Partial<TaxSession>): Promise<TaxSession>;
   
   // Form 16 operations
@@ -91,6 +92,12 @@ export class MemStorage implements IStorage {
 
   async getTaxSessionByUser(userId: string, financialYear: string): Promise<TaxSession | undefined> {
     return Array.from(this.taxSessions.values()).find(
+      session => session.userId === userId && session.financialYear === financialYear
+    );
+  }
+
+  async getAllTaxSessionsByUser(userId: string, financialYear: string): Promise<TaxSession[]> {
+    return Array.from(this.taxSessions.values()).filter(
       session => session.userId === userId && session.financialYear === financialYear
     );
   }
@@ -207,6 +214,14 @@ export class DatabaseStorage implements IStorage {
       .from(taxSessions)
       .where(and(eq(taxSessions.userId, userId), eq(taxSessions.financialYear, financialYear)));
     return taxSession || undefined;
+  }
+
+  async getAllTaxSessionsByUser(userId: string, financialYear: string): Promise<TaxSession[]> {
+    return await db
+      .select()
+      .from(taxSessions)
+      .where(and(eq(taxSessions.userId, userId), eq(taxSessions.financialYear, financialYear)))
+      .orderBy(desc(taxSessions.createdAt));
   }
 
   async updateTaxSession(id: string, data: Partial<TaxSession>): Promise<TaxSession> {
