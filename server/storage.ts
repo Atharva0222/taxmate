@@ -10,6 +10,8 @@ import {
   type InsertForm16Upload,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -145,4 +147,113 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User operations - required for Replit Auth
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...userData,
+        email: userData.email || null,
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null,
+        profileImageUrl: userData.profileImageUrl || null,
+      })
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          email: userData.email || null,
+          firstName: userData.firstName || null,
+          lastName: userData.lastName || null,
+          profileImageUrl: userData.profileImageUrl || null,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Tax session operations
+  async createTaxSession(data: InsertTaxSession): Promise<TaxSession> {
+    const [taxSession] = await db
+      .insert(taxSessions)
+      .values({
+        ...data,
+        currentStep: data.currentStep || 1,
+        isCompleted: data.isCompleted || false,
+        onboardingData: data.onboardingData || null,
+        extractedData: data.extractedData || null,
+        taxCalculations: data.taxCalculations || null,
+        taxSuggestions: data.taxSuggestions || null,
+        itrData: data.itrData || null,
+      })
+      .returning();
+    return taxSession;
+  }
+
+  async getTaxSession(id: string): Promise<TaxSession | undefined> {
+    const [taxSession] = await db.select().from(taxSessions).where(eq(taxSessions.id, id));
+    return taxSession || undefined;
+  }
+
+  async getTaxSessionByUser(userId: string, financialYear: string): Promise<TaxSession | undefined> {
+    const [taxSession] = await db
+      .select()
+      .from(taxSessions)
+      .where(and(eq(taxSessions.userId, userId), eq(taxSessions.financialYear, financialYear)));
+    return taxSession || undefined;
+  }
+
+  async updateTaxSession(id: string, data: Partial<TaxSession>): Promise<TaxSession> {
+    const [taxSession] = await db
+      .update(taxSessions)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(taxSessions.id, id))
+      .returning();
+    return taxSession;
+  }
+
+  // Form 16 operations
+  async createForm16Upload(data: InsertForm16Upload): Promise<Form16Upload> {
+    const [upload] = await db
+      .insert(form16Uploads)
+      .values({
+        ...data,
+        processingStatus: "pending",
+        extractedData: null,
+      })
+      .returning();
+    return upload;
+  }
+
+  async getForm16Upload(id: string): Promise<Form16Upload | undefined> {
+    const [upload] = await db.select().from(form16Uploads).where(eq(form16Uploads.id, id));
+    return upload || undefined;
+  }
+
+  async getForm16UploadsBySession(taxSessionId: string): Promise<Form16Upload[]> {
+    return await db
+      .select()
+      .from(form16Uploads)
+      .where(eq(form16Uploads.taxSessionId, taxSessionId));
+  }
+
+  async updateForm16Upload(id: string, data: Partial<Form16Upload>): Promise<Form16Upload> {
+    const [upload] = await db
+      .update(form16Uploads)
+      .set(data)
+      .where(eq(form16Uploads.id, id))
+      .returning();
+    return upload;
+  }
+}
+
+export const storage = new DatabaseStorage();
