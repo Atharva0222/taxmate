@@ -1,0 +1,83 @@
+✅ Master Prompt for AI (Build EZTaxMate App from Scratch)
+You are a senior full-stack developer, UX designer, and product manager all in one. I want you to help me build a real-world web app for Indian users called **EZTaxMate**.
+
+### 🎯 App Goal:
+Build a web application that simplifies income tax return (ITR-1) filing for newly joined employees in India (0–3 years experience), using AI. The app should:
+- Automatically extract data from Form 16 (PDF/image)
+- Explain tax terms in beginner-friendly language
+- Offer AI-based tax-saving suggestions (under sections like 80C, 80D)
+- Allow users to download a completed ITR-1 JSON file
+- Provide an optional GPT-powered chatbot (TaxBot) for queries
+
+---
+
+### 🧑‍💼 Target Audience:
+- Young working professionals (fresher to 3 years)
+- Salary varies from ₹3–20 LPA
+- Low to medium financial literacy
+- Wants ease, guidance, and financial growth
+
+---
+
+### 🔁 Core Workflow:
+1. ✅ Google Login
+2. ❓ Friendly Q&A to understand user goals
+3. 📂 Upload Form 16 (PDF/image) with clear help
+4. 🤖 OCR + GPT AI extracts salary, TDS, deductions
+5. 👶 Walkthrough of extracted data, with "Explain like I'm 5" option
+6. 🧠 AI suggests personalized investment tips (e.g., ELSS, health insurance)
+7. 📝 Auto-fill ITR-1 and allow user to download JSON
+8. 💬 Optional AI Chatbot for user questions (TaxBot)
+9. 🏠 Dashboard with progress bar and helpful nudges
+
+---
+
+### 🎨 Design Style:
+- Clean, emoji-friendly UI
+- Progress bar showing steps
+- Easy / Advanced mode toggle
+- Accessible language with tooltips
+- Mobile-responsive
+
+---
+
+### 🛠️ Tech Stack (Preferred):
+- Frontend: React + Tailwind CSS (or Next.js)
+- Backend: Node.js + Express OR Flask (Python)
+- OCR: Tesseract.js / PyTesseract
+- AI: GPT-4 API or GPT-4o for extraction + chatbot
+- Auth: Firebase Authentication (Google OAuth)
+- Database: Firebase Firestore or MongoDB
+- File Handling: Firebase Storage or Cloudinary
+- Deployment: Vercel / Netlify / Render
+
+---
+
+### 📥 AI Features to Implement:
+1. **Prompt GPT to extract structured JSON from messy OCR text of Form 16** (fields: Name, PAN, Employer, Gross Salary, Deductions under 80C, 80D, TDS Paid, Tax Payable).
+2. **Prompt GPT to suggest savings** based on missing deductions and age group (e.g., ELSS for 80C, health insurance for 80D).
+3. **Create a friendly chatbot** that answers ITR-related questions with a tone that's helpful, non-technical, and accurate.
+
+---
+
+### 🔮 Future Enhancements:
+- ITR-U support (updated returns)
+- AIS/26AS comparison with Form 16
+- Track investments made by user
+- Year-round tax planning
+- Multilingual support (Hindi, Tamil, etc.)
+
+---
+
+### ✅ Task for You:
+Build this entire app from scratch — end-to-end.
+1. Start by scaffolding the folder structure.
+2. Implement frontend UI with step-by-step experience.
+3. Create backend routes for Form 16 parsing and AI interaction.
+4. Include sample prompts and dummy data.
+5. Explain how to deploy it live and test it.
+6. Document the architecture and reasoning.
+
+This project should be understandable for a developer who wants to customize and expand it later. Add comments, explanations, and make it clean and maintainable.
+
+Now generate the full app, starting from structure, then go component by component.
