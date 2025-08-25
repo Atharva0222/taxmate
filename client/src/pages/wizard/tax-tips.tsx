@@ -47,7 +47,7 @@ export default function TaxTips({ params }: TaxTipsProps) {
       });
       return response.json();
     },
-    enabled: isAuthenticated && !!taxSession,
+    enabled: !!user && !!taxSession,
     retry: false,
   });
 
@@ -65,17 +65,6 @@ export default function TaxTips({ params }: TaxTipsProps) {
       setLocation(`/wizard/itr/${sessionId}`);
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
       toast({
         title: "Error",
         description: "Failed to apply suggestions",
