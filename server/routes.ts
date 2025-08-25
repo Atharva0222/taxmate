@@ -1,13 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-// Import both auth modules
-import { setupAuth as setupReplitAuth, isAuthenticated as isReplitAuthenticated } from "./replitAuth";
-import { setupAuth as setupGoogleAuth, isAuthenticated as isGoogleAuthenticated } from "./googleAuth";
-
-// Choose auth based on environment
-const setupAuth = process.env.NODE_ENV === 'production' ? setupGoogleAuth : setupReplitAuth;
-const isAuthenticated = process.env.NODE_ENV === 'production' ? isGoogleAuthenticated : isReplitAuthenticated;
+import { setupAuth, isAuthenticated } from "./auth";
 import { createTaxSessionSchema, updateTaxSessionSchema, createForm16UploadSchema } from "@shared/schema";
 import multer from "multer";
 import { z } from "zod";
@@ -15,25 +9,15 @@ import { z } from "zod";
 const upload = multer({ dest: 'uploads/' });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - setupAuth handles all auth endpoints
+  setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Tax-related routes follow below...
 
   // Tax session routes
   app.post('/api/tax-sessions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validatedData = createTaxSessionSchema.parse(req.body);
       const forceNew = req.query.forceNew === 'true';
       
@@ -60,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tax sessions for user by financial year
   app.get('/api/tax-sessions/user/all/:financialYear', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { financialYear } = req.params;
       
       const sessions = await storage.getAllTaxSessionsByUser(userId, financialYear);
