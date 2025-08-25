@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,32 +19,22 @@ interface ExtractedDataProps {
 
 export default function ExtractedData({ params }: ExtractedDataProps) {
   const { sessionId } = params;
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [advancedMode, setAdvancedMode] = useState(false);
   const [showExplainer, setShowExplainer] = useState(false);
   const [explainerContent, setExplainerContent] = useState({ title: "", content: "" });
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
+  // Show loading while auth is loading
+  if (authLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   // Fetch tax session
   const { data: taxSession, isLoading: sessionLoading } = useQuery<TaxSession>({
     queryKey: ["/api/tax-sessions", sessionId],
-    enabled: isAuthenticated,
+    enabled: !!user,
     retry: false,
   });
 
