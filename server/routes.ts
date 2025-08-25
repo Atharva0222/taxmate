@@ -57,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tax-sessions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const taxSession = await storage.getTaxSession(req.params.id);
       
       if (!taxSession || taxSession.userId !== userId) {
@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/tax-sessions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const taxSession = await storage.getTaxSession(req.params.id);
       
       if (!taxSession || taxSession.userId !== userId) {
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tax-sessions/user/:financialYear', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const taxSession = await storage.getTaxSessionByUser(userId, req.params.financialYear);
       
       res.json(taxSession || null);
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Form 16 upload routes
   app.post('/api/form16/upload', isAuthenticated, upload.single('form16'), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { taxSessionId } = req.body;
       
       if (!req.file) {
@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/form16/:id/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const upload = await storage.getForm16Upload(req.params.id);
       
       if (!upload) {
@@ -192,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tax suggestions route
   app.post('/api/tax-suggestions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { taxSessionId } = req.body;
 
       const taxSession = await storage.getTaxSession(taxSessionId);
@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ITR generation route
   app.post('/api/generate-itr', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { taxSessionId, appliedSuggestions } = req.body;
 
       const taxSession = await storage.getTaxSession(taxSessionId);
