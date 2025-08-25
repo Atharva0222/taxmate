@@ -11,5 +11,15 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Configure SSL for production
+const poolConfig = {
+  connectionString: process.env.DATABASE_URL,
+  ...(process.env.NODE_ENV === 'production' && {
+    ssl: {
+      rejectUnauthorized: false
+    }
+  })
+};
+
+export const pool = new Pool(poolConfig);
 export const db = drizzle({ client: pool, schema });
