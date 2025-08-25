@@ -16,20 +16,25 @@ import ITRGeneration from "@/pages/wizard/itr-generation";
 function Router() {
   const { user, isLoading } = useAuth();
 
+  // Show loading state
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  // If not authenticated, show auth page for all routes
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  // If authenticated, show protected routes
   return (
     <Switch>
-      {isLoading || !user ? (
-        <Route path="/" component={AuthPage} />
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/wizard/onboarding/:sessionId" component={Onboarding} />
-          <Route path="/wizard/upload/:sessionId" component={Upload} />
-          <Route path="/wizard/review/:sessionId" component={ExtractedData} />
-          <Route path="/wizard/tips/:sessionId" component={TaxTips} />
-          <Route path="/wizard/itr/:sessionId" component={ITRGeneration} />
-        </>
-      )}
+      <Route path="/" component={Dashboard} />
+      <Route path="/wizard/onboarding/:sessionId" component={Onboarding} />
+      <Route path="/wizard/upload/:sessionId" component={Upload} />
+      <Route path="/wizard/review/:sessionId" component={ExtractedData} />
+      <Route path="/wizard/tips/:sessionId" component={TaxTips} />
+      <Route path="/wizard/itr/:sessionId" component={ITRGeneration} />
       <Route component={NotFound} />
     </Switch>
   );
