@@ -155,7 +155,7 @@ export default function Dashboard() {
                 <i className="fas fa-calendar"></i>
                 <span>FY {financialYear}</span>
               </div>
-              <Button variant="outline" onClick={() => window.location.href = '/api/logout'} data-testid="button-logout">
+              <Button variant="outline" onClick={() => logoutMutation.mutate()} data-testid="button-logout">
                 <i className="fas fa-sign-out-alt mr-2"></i>Logout
               </Button>
             </div>
