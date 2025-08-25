@@ -56,17 +56,6 @@ export default function ITRGeneration({ params }: ITRGenerationProps) {
       });
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
       setGenerationStatus('error');
       toast({
         title: "Generation Failed",
