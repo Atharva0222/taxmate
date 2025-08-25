@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
@@ -11,40 +11,30 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import TaxBot from "@/components/chatbot/taxbot";
-import type { TaxSession, User } from "@shared/schema";
+import type { TaxSession } from "@shared/schema";
 
 export default function Dashboard() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, isLoading: authLoading, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [financialYear] = useState("2023-24");
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
+  // Show loading while auth is loading
+  if (authLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   // Fetch existing tax session (latest one)
   const { data: taxSession, isLoading: sessionLoading } = useQuery<TaxSession>({
     queryKey: ["/api/tax-sessions/user", financialYear],
-    enabled: isAuthenticated,
+    enabled: !!user,
     retry: false,
   });
 
   // Fetch all tax sessions for the user
   const { data: allSessions, isLoading: allSessionsLoading } = useQuery<TaxSession[]>({
     queryKey: ["/api/tax-sessions/user/all", financialYear],
-    enabled: isAuthenticated,
+    enabled: !!user,
     retry: false,
   });
 
