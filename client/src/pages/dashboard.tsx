@@ -230,19 +230,40 @@ export default function Dashboard() {
                         {steps.find(s => s.number === (taxSession.currentStep || 1))?.description}
                       </p>
                     </div>
-                    <Button onClick={handleStartFiling} disabled={createSessionMutation.isPending} className="w-full" data-testid="button-continue-filing">
-                      {createSessionMutation.isPending ? (
-                        <>
-                          <i className="fas fa-spinner fa-spin mr-2"></i>
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-arrow-right mr-2"></i>
-                          Continue Where You Left Off
-                        </>
-                      )}
-                    </Button>
+                    <div className="space-y-2">
+                      <Button onClick={handleStartFiling} disabled={createSessionMutation.isPending} className="w-full" data-testid="button-continue-filing">
+                        {createSessionMutation.isPending ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-arrow-right mr-2"></i>
+                            Continue Where You Left Off
+                          </>
+                        )}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleStartNewFiling} 
+                        disabled={createSessionMutation.isPending} 
+                        className="w-full" 
+                        data-testid="button-start-fresh-main"
+                      >
+                        {createSessionMutation.isPending ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-plus mr-2"></i>
+                            Start Fresh Filing
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -304,20 +325,18 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
-                    {allSessions.length > 1 && (
-                      <div className="flex gap-2 pt-2 border-t">
-                        <Button
-                          variant="outline"
-                          onClick={handleStartNewFiling}
-                          disabled={createSessionMutation.isPending}
-                          className="flex-1"
-                          data-testid="button-start-new-filing"
-                        >
-                          <i className="fas fa-plus mr-2"></i>
-                          Start Fresh Filing
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        onClick={handleStartNewFiling}
+                        disabled={createSessionMutation.isPending}
+                        className="flex-1"
+                        data-testid="button-start-new-filing"
+                      >
+                        <i className="fas fa-plus mr-2"></i>
+                        Start Fresh Filing
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
