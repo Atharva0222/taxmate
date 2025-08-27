@@ -1,5 +1,9 @@
 # Deployment Instructions for Render
 
+## Important: Build Output Location
+
+The application builds to the `dist` folder in the project root, not `/src/dist`.
+
 ## Database Setup
 
 This application uses Render's PostgreSQL database (NOT Neon serverless database).
@@ -16,13 +20,15 @@ Set the following in your Render dashboard:
 
 **Build Command:**
 ```bash
-./build.sh
+chmod +x build.sh && ./build.sh
 ```
 
 **Start Command:**
 ```bash
-npm start
+node dist/index.js
 ```
+
+Or alternatively, use the provided `render.yaml` file for automatic configuration.
 
 ### 3. Environment Variables
 

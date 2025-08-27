@@ -11,8 +11,18 @@ npm install
 echo "Building application..."
 npm run build
 
+# Check if dist folder was created
+if [ ! -d "dist" ]; then
+  echo "Error: dist folder not created during build"
+  exit 1
+fi
+
+# List contents of dist folder for debugging
+echo "Contents of dist folder:"
+ls -la dist/
+
 # Run database migrations
 echo "Running database migrations..."
-tsx server/migrate.ts || echo "Migration might have already been applied"
+npx tsx server/migrate.ts || echo "Migration might have already been applied"
 
 echo "Build complete!"
