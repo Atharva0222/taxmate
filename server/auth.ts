@@ -44,16 +44,17 @@ export function setupAuth(app: Express) {
       : 'dev-secret-key'
   );
   
+  // For production, append SSL to connection string if not present
+  let connectionString = process.env.DATABASE_URL!;
+  if (process.env.NODE_ENV === 'production' && !connectionString.includes('sslmode=')) {
+    connectionString += connectionString.includes('?') ? '&sslmode=require' : '?sslmode=require';
+  }
+  
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    conString: connectionString,
     createTableIfMissing: false,
     ttl: sessionTtl,
-    tableName: "sessions",
-    ...(process.env.NODE_ENV === 'production' && {
-      ssl: {
-        rejectUnauthorized: false
-      }
-    })
+    tableName: "sessions"
   });
 
   const sessionSettings: session.SessionOptions = {
