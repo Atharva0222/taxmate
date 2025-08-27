@@ -5,11 +5,15 @@ The application fails to start on Render with error: `Cannot find module '/opt/r
 
 ## Solution
 
-### Option 1: Manual Configuration in Render Dashboard
+### Option 1: Manual Configuration in Render Dashboard (RECOMMENDED)
 
 1. **Build Command:**
    ```bash
-   npm install && npm run build
+   chmod +x render-build.sh && ./render-build.sh
+   ```
+   OR if that doesn't work:
+   ```bash
+   NODE_ENV=development npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && npx tsx server/migrate.ts
    ```
 
 2. **Start Command:**
