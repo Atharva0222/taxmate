@@ -3,13 +3,17 @@
 # Build script for Render deployment
 echo "Starting build process..."
 
-# Install dependencies
+# Install dependencies (including dev dependencies needed for build)
 echo "Installing dependencies..."
-npm install
+npm ci || npm install
+
+# Verify vite is installed
+echo "Checking for vite..."
+npx vite --version || (echo "Vite not found, installing..." && npm install vite)
 
 # Build the application
 echo "Building application..."
-npm run build
+npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
 
 # Check if dist folder was created
 if [ ! -d "dist" ]; then
