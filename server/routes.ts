@@ -9,6 +9,16 @@ import { z } from "zod";
 const upload = multer({ dest: 'uploads/' });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Render
+  app.get("/health", (_req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: !!process.env.DATABASE_URL
+    });
+  });
+
   // Auth middleware - setupAuth handles all auth endpoints
   setupAuth(app);
 
