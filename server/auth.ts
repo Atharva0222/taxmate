@@ -37,6 +37,13 @@ export function setupAuth(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   
+  // Use a fallback secret in production if not set (Render might not have this env var)
+  const sessionSecret = process.env.SESSION_SECRET || (
+    process.env.NODE_ENV === 'production' 
+      ? 'render-default-secret-' + Math.random().toString(36).substring(7)
+      : 'dev-secret-key'
+  );
+  
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
@@ -50,7 +57,7 @@ export function setupAuth(app: Express) {
   });
 
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,

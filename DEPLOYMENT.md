@@ -20,7 +20,7 @@ Set the following in your Render dashboard:
 
 **Build Command:**
 ```bash
-chmod +x build.sh && ./build.sh
+chmod +x render-build.sh && ./render-build.sh
 ```
 
 **Start Command:**
@@ -30,13 +30,24 @@ node dist/index.js
 
 Or alternatively, use the provided `render.yaml` file for automatic configuration.
 
-### 3. Environment Variables
+### 3. Environment Variables ⚠️ CRITICAL FOR 502 ERROR FIX
 
-Ensure these environment variables are set in Render:
+**Missing environment variables are the most common cause of 502 errors on Render.**
 
-- `DATABASE_URL` - Automatically provided by Render PostgreSQL
-- `SESSION_SECRET` - A secure random string for session encryption
-- `NODE_ENV` - Set to "production"
+Ensure these environment variables are set in your Render dashboard:
+
+1. **SESSION_SECRET** (REQUIRED - Often missing!)
+   - Generate a secure secret: `openssl rand -base64 32`
+   - Example: `xKj9!mP2$qR5&vN8#bL3^fH6*wE1@zC4`
+   - **Without this, authentication will fail with 502 errors**
+
+2. **NODE_ENV** 
+   - Must be set to: `production`
+   - This enables SSL for database connections
+
+3. **DATABASE_URL** 
+   - Automatically provided by Render PostgreSQL
+   - Format: `postgresql://username:password@host:port/database`
 
 ### 4. Database Migration
 
