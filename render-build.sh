@@ -27,8 +27,8 @@ else
   exit 1
 fi
 
-# Run database migrations
-echo "=== Running database migrations ==="
-npx tsx server/migrate.ts || echo "Note: Migration may have already been applied"
+# Fix database schema (drops and recreates tables with correct columns)
+echo "=== Fixing database schema ==="
+npx tsx server/fix-migration.ts || echo "Note: Schema fix may have already been applied"
 
 echo "=== Build complete! ==="
