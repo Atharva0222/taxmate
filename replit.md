@@ -20,14 +20,14 @@ Preferred communication style: Simple, everyday language.
 ## Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Authentication**: Replit Auth using OpenID Connect with Passport.js
+- **Authentication**: Custom database authentication with Passport.js LocalStrategy
 - **Session Management**: Express sessions with PostgreSQL session store
 - **File Processing**: Multer for file upload handling
-- **Storage Layer**: Abstracted storage interface with in-memory implementation for development
+- **Storage Layer**: Database storage implementation using PostgreSQL
 
 ## Database Design
 - **Database**: PostgreSQL with Drizzle ORM
-- **Connection**: Neon serverless database driver
+- **Connection**: Standard PostgreSQL driver (pg) with SSL for production on Render
 - **Tables**:
   - `users`: User profile information
   - `sessions`: Session storage for authentication
@@ -36,10 +36,10 @@ Preferred communication style: Simple, everyday language.
 - **Data Types**: JSONB columns for flexible storage of onboarding data, extracted tax data, calculations, and suggestions
 
 ## Authentication & Authorization
-- **Provider**: Replit Auth with Google OAuth integration
+- **Provider**: Custom database authentication using Passport.js with LocalStrategy
 - **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
-- **Security**: HTTP-only cookies with secure flags for production
-- **User Management**: Automatic user creation and profile updates on authentication
+- **Security**: HTTP-only cookies with secure flags for production, password hashing with scrypt
+- **User Management**: User registration and login with username/password stored in PostgreSQL
 
 ## File Processing Workflow
 - **Upload**: Secure file upload with validation (PDF, JPG, PNG up to 10MB)
@@ -63,12 +63,13 @@ Preferred communication style: Simple, everyday language.
 # External Dependencies
 
 ## Database Services
-- **Neon Database**: Serverless PostgreSQL hosting with connection pooling
+- **Render PostgreSQL**: Standard PostgreSQL database hosted on Render platform
 - **Drizzle ORM**: Type-safe database operations with migration support
+- **Connection**: Standard node-postgres driver with SSL for production
 
 ## Authentication Services
-- **Replit Auth**: OpenID Connect authentication provider
-- **Google OAuth**: Social login integration through Replit Auth
+- **Custom Database Auth**: Passport.js with LocalStrategy for username/password authentication
+- **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
 
 ## UI Component Libraries
 - **Radix UI**: Headless, accessible UI primitives for complex components

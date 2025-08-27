@@ -1,17 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-
-// Configure Neon based on environment
-if (process.env.NODE_ENV === 'production') {
-  // In production, use HTTP instead of WebSockets
-  neonConfig.fetchConnectionCache = true;
-  neonConfig.poolQueryViaFetch = true;
-} else {
-  // In development, use WebSockets
-  neonConfig.webSocketConstructor = ws;
-}
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -19,12 +8,13 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create pool with proper SSL configuration for production
+// Create standard PostgreSQL pool for Render's database
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   connectionTimeoutMillis: 30000, // 30 seconds timeout
   idleTimeoutMillis: 30000,
   max: 10, // max pool size
+  // Render's PostgreSQL requires SSL in production
   ...(process.env.NODE_ENV === 'production' && {
     ssl: {
       rejectUnauthorized: false
@@ -32,4 +22,5 @@ export const pool = new Pool({
   })
 });
 
-export const db = drizzle({ client: pool, schema });
+// Use standard node-postgres adapter instead of neon-serverless
+export const db = drizzle(pool, { schema });
